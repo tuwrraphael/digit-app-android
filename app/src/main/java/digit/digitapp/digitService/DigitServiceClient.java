@@ -8,4 +8,7 @@ import retrofit2.http.POST;
 public interface DigitServiceClient {
     @POST("api/device/12345/log")
     Call<ResponseBody> Log(@Body LogEntry entry);
+
+    @POST("api/me/location")
+    Call<ResponseBody> AddLocation(@Body Location location);
 }

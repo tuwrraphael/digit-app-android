@@ -1,14 +1,18 @@
 package digit.digitapp;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -57,41 +61,15 @@ public class MainActivity extends Activity {
             startActivity(loginActivity);
             this.finish();
         }
-        final  IDigitServiceClientConfig digitServiceClientConfig = DigitServiceClientConfig.Default;
-        final  AuthenticationOptions authenticationOptions = digitServiceClientConfig.getAuthenticationOptions();
-        AuthorizationService authorizationService = new AuthorizationService(this);
-        authState.performActionWithFreshTokens(authorizationService, new ClientSecretBasic(authenticationOptions.getClientSecret()),
-                new AuthState.AuthStateAction() {
-                    @Override
-                    public void execute(@Nullable final String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-                            @Override
-                            public Response intercept(Chain chain) throws IOException {
-                                Request newRequest  = chain.request().newBuilder()
-                                        .addHeader("Authorization", "Bearer " + accessToken)
-                                        .build();
-                                return chain.proceed(newRequest);
-                            }
-                        }).build();
-                        Retrofit retrofit = new Retrofit.Builder()
-                                .client(client)
-                                .baseUrl("https://digit-svc.azurewebsites.net")
-                                .addConverterFactory(GsonConverterFactory.create())
-                                .build();
-
-                        DigitServiceClient digitServiceClient = retrofit.create(DigitServiceClient.class);
-                        digitServiceClient.Log(new LogEntry(null, new Date(), 123, "Test from android", "digitAppAndroid")).enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-
-                                }
-
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-                                }
-                         });
-                    }
-                });
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        123);
+            }
+        } else {
+        }
     }
 }

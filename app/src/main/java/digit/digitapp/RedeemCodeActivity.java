@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationRequest;
@@ -45,6 +47,8 @@ public class RedeemCodeActivity extends Activity {
                         @Override public void onTokenRequestCompleted(TokenResponse tokenResponse, AuthorizationException ex) {
                             authStateManager.updateAfterTokenResponse(tokenResponse, ex);
                             if (tokenResponse != null) {
+                                String token = DigitFirebaseMessagingService.getToken(context);
+                                new PushSubscriptionManager(context).sendToken(token);
                                 Intent mainActivity = new Intent(context, MainActivity.class);
                                 startActivity(mainActivity);
                             } else {

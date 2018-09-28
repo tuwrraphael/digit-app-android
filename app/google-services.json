@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "937643837025",
+    "firebase_url": "https://digit-app-android.firebaseio.com",
+    "project_id": "digit-app-android",
+    "storage_bucket": "digit-app-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:937643837025:android:ea3b553ccc0f81c7",
+        "android_client_info": {
+          "package_name": "digit.digitapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "937643837025-oqj5vgs3qqbmna00a6khrufrateu2k3i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACRc2MdPTSrhgaQfC2EZY94qLCBBI72vI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

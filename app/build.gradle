@@ -30,4 +30,8 @@ dependencies {
     api 'net.openid:appauth:0.7.1'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation 'com.google.firebase:firebase-messaging:17.3.2'
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
 }
+apply plugin: 'com.google.gms.google-services'
