@@ -60,7 +60,7 @@ public class DigitServiceManager {
                         }).build();
                         Retrofit retrofit = new Retrofit.Builder()
                                 .client(client)
-                                .baseUrl("https://digit-svc.azurewebsites.net/")
+                                .baseUrl(digitServiceClientConfig.getDigitServiceUrl())
                                 .addConverterFactory(GsonConverterFactory.create())
                                 .build();
 

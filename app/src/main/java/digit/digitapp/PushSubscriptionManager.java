@@ -58,7 +58,7 @@ public class PushSubscriptionManager {
                         }).build();
                         Retrofit retrofit = new Retrofit.Builder()
                                 .client(client)
-                                .baseUrl("https://pushsvc.azurewebsites.net/")
+                                .baseUrl(digitServiceClientConfig.getPushServiceUrl())
                                 .addConverterFactory(GsonConverterFactory.create())
                                 .build();
 
