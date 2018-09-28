@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DigitApp</string>
+    <string name="LoginErrorText">Login Error</string>
+</resources>
