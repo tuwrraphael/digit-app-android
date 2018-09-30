@@ -7,6 +7,9 @@ import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -31,17 +34,42 @@ public class DigitFirebaseMessagingService extends FirebaseMessagingService {
             String action = data.get("Action");
             switch (action) {
                 case "send_location":
-                    FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+                    final FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
                     fusedLocationProviderClient.getLastLocation()
                             .addOnSuccessListener(new OnSuccessListener<Location>() {
                                 @Override
-                                public void onSuccess(Location location) {
-                                    digit.digitapp.digitService.Location location1 = new digit.digitapp.digitService.Location();
-                                    location1.setAccuracy(location.getAccuracy());
-                                    location1.setLatitude(location.getLatitude());
-                                    location1.setLongitude(location.getLongitude());
-                                    location1.setTimestamp(new Date());
-                                    new DigitServiceManager(context).sendLocation(location1);
+                                public void onSuccess(final Location location) {
+                                    if (null == location) {
+                                        final LocationCallback locationCallback = new LocationCallback() {
+                                            @Override
+                                            public void onLocationResult(LocationResult locationResult) {
+                                                if (locationResult == null) {
+                                                    return;
+                                                }
+                                                digit.digitapp.digitService.Location location1 = new digit.digitapp.digitService.Location();
+                                                Location lastLocation = locationResult.getLastLocation();
+                                                location1.setAccuracy(lastLocation.getAccuracy());
+                                                location1.setLatitude(lastLocation.getLatitude());
+                                                location1.setLongitude(lastLocation.getLongitude());
+                                                location1.setTimestamp(new Date());
+                                                new DigitServiceManager(context).sendLocation(location1);
+                                                fusedLocationProviderClient.removeLocationUpdates(this);
+                                            };
+                                        };
+                                        LocationRequest mLocationRequest = new LocationRequest();
+                                        mLocationRequest.setMaxWaitTime(10000);
+                                        mLocationRequest.setNumUpdates(1);
+                                        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                                        fusedLocationProviderClient.requestLocationUpdates(mLocationRequest,locationCallback, null);
+                                    }
+                                    else {
+                                        digit.digitapp.digitService.Location location1 = new digit.digitapp.digitService.Location();
+                                        location1.setAccuracy(location.getAccuracy());
+                                        location1.setLatitude(location.getLatitude());
+                                        location1.setLongitude(location.getLongitude());
+                                        location1.setTimestamp(new Date());
+                                        new DigitServiceManager(context).sendLocation(location1);
+                                    }
                                 }
                             });
                     break;

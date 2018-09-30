@@ -46,6 +46,7 @@ public class PushSubscriptionManager {
                 new AuthState.AuthStateAction() {
                     @Override
                     public void execute(@Nullable final String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                        authStateManager.replace(authState);
                         authorizationService.dispose();
                         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
                             @Override
@@ -74,7 +75,7 @@ public class PushSubscriptionManager {
                                 registration.setToken(token);
                                 boolean channelExists = false;
                                 for(PushChannelConfiguration config:response.body()){
-                                    channelExists = config.getOptions().containsKey("digit.locationRequest");
+                                    channelExists = config.getOptions().containsKey("digitLocationRequest");
                                     if (channelExists) {
                                         pushServiceClient.UpdateChannel(config.getId(), registration).enqueue(new Callback<PushChannelConfiguration[]>() {
                                             @Override

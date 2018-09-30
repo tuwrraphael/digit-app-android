@@ -48,6 +48,7 @@ public class DigitServiceManager {
                 new AuthState.AuthStateAction() {
                     @Override
                     public void execute(@Nullable final String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                        authStateManager.replace(authState);
                         authorizationService.dispose();
                         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
                             @Override
