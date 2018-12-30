@@ -3,6 +3,9 @@ package digit.digitapp;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationService;
@@ -99,10 +102,11 @@ public class DigitServiceManager {
                                 return chain.proceed(newRequest);
                             }
                         }).build();
+                        Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new GsonUTCDateAdapter()).create();
                         Retrofit retrofit = new Retrofit.Builder()
                                 .client(client)
                                 .baseUrl(digitServiceClientConfig.getDigitServiceUrl())
-                                .addConverterFactory(GsonConverterFactory.create())
+                                .addConverterFactory(GsonConverterFactory.create(gson))
                                 .build();
 
                         final DigitServiceClient digitServiceClient = retrofit.create(DigitServiceClient.class);
