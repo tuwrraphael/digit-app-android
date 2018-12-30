@@ -10,5 +10,5 @@ public interface DigitServiceClient {
     Call<ResponseBody> Log(@Body LogEntry entry);
 
     @POST("api/me/location")
-    Call<ResponseBody> AddLocation(@Body Location location);
+    Call<LocationResponse> AddLocation(@Body Location location);
 }

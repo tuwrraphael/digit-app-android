@@ -9,9 +9,13 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.ClientSecretBasic;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import digit.digitapp.digitService.DigitServiceClient;
 import digit.digitapp.digitService.Location;
+import digit.digitapp.digitService.LocationResponse;
+import digit.digitapp.digitService.LogEntry;
 import digit.digitapp.pushService.FirebasePushChannelRegistration;
 import digit.digitapp.pushService.FirebasePushChannelRegistrationOptions;
 import digit.digitapp.pushService.PushChannelConfiguration;
@@ -28,14 +32,47 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DigitServiceManager {
 
+    private interface DigitServiceAction {
+        void execute(DigitServiceClient digitServiceClient);
+    }
+
     private Context context;
 
     public DigitServiceManager(Context context) {
         this.context = context;
     }
 
-    public void sendLocation(Location s) {
-        final Location location = s;
+    public void sendLocation(final Location location, final Callback<LocationResponse> finished) {
+        executeAuthorized(new DigitServiceAction() {
+            @Override
+            public void execute(DigitServiceClient digitServiceClient) {
+                digitServiceClient.AddLocation(location).enqueue(finished);
+            }
+        });
+    }
+
+    public void log(String msg, int code, final ActionFinished finished) {
+        final LogEntry entry = new LogEntry(null, new Date(), code, msg, "digitAppAndroid");
+        executeAuthorized(new DigitServiceAction() {
+            @Override
+            public void execute(DigitServiceClient digitServiceClient) {
+                digitServiceClient.Log(entry).enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                        finished.finished();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        finished.finished();
+                    }
+                });
+            }
+        });
+    }
+
+
+    private void executeAuthorized(final DigitServiceAction action) {
         final AuthStateManager authStateManager = AuthStateManager.getInstance(context);
         final AuthState authState = authStateManager.getCurrent();
         if (null == authState.getAccessToken() || null == authState.getRefreshToken()) {
@@ -50,7 +87,10 @@ public class DigitServiceManager {
                     public void execute(@Nullable final String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                         authStateManager.replace(authState);
                         authorizationService.dispose();
-                        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
+                        OkHttpClient client = new OkHttpClient.Builder()
+                                .readTimeout(60, TimeUnit.SECONDS)
+                                .connectTimeout(10,TimeUnit.SECONDS)
+                                .addInterceptor(new Interceptor() {
                             @Override
                             public Response intercept(Chain chain) throws IOException {
                                 Request newRequest  = chain.request().newBuilder()
@@ -66,17 +106,7 @@ public class DigitServiceManager {
                                 .build();
 
                         final DigitServiceClient digitServiceClient = retrofit.create(DigitServiceClient.class);
-                        digitServiceClient.AddLocation(location).enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-                            }
-                        });
+                       action.execute(digitServiceClient);
                     }
                 });
     }

@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">DigitApp</string>
     <string name="LoginErrorText">Login Error</string>
+    <string name="location_notification_title">Digit Lokalisierung</string>
+    <string name="location_notification_content">Digit verwendet Ihre Position um Routen zu planen.</string>
+    <string name="default_channel_name">Standardkanal</string>
+    <string name="default_channel_description">Standardkanal für Digit</string>
 </resources>

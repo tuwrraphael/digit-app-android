@@ -38,6 +38,12 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <service android:name="digit.digitapp.LocationService"></service>
+        <receiver android:name="digit.digitapp.LocationAlarmReceiver">
+            <intent-filter>
+                <action android:name="digit.digitapp.alarms" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
