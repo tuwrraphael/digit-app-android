@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationService;
@@ -83,6 +84,9 @@ public class DigitServiceManager {
         }
         final  IDigitServiceClientConfig digitServiceClientConfig = DigitServiceClientConfig.Default;
         final  AuthenticationOptions authenticationOptions = digitServiceClientConfig.getAuthenticationOptions();
+        final AppAuthConfiguration config =  new AppAuthConfiguration.Builder()
+                .setConnectionBuilder(DigitAuthConnectionBuilder.INSTANCE)
+                .build();
         final AuthorizationService authorizationService = new AuthorizationService(context);
         authState.performActionWithFreshTokens(authorizationService, new ClientSecretBasic(authenticationOptions.getClientSecret()),
                 new AuthState.AuthStateAction() {
