@@ -87,7 +87,7 @@ public class DigitServiceManager {
         final AppAuthConfiguration config =  new AppAuthConfiguration.Builder()
                 .setConnectionBuilder(DigitAuthConnectionBuilder.INSTANCE)
                 .build();
-        final AuthorizationService authorizationService = new AuthorizationService(context);
+        final AuthorizationService authorizationService = new AuthorizationService(context, config);
         authState.performActionWithFreshTokens(authorizationService, new ClientSecretBasic(authenticationOptions.getClientSecret()),
                 new AuthState.AuthStateAction() {
                     @Override
