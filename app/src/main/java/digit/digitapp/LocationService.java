@@ -13,20 +13,26 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import digit.digitapp.digitService.GeofenceRequest;
 import digit.digitapp.digitService.LocationResponse;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,6 +45,7 @@ public class LocationService extends Service {
 
     private final class ServiceHandler extends Handler {
         private Context applicationContext;
+        private Location sentLocation;
 
         public ServiceHandler(Looper looper, Context applicationContext) {
             super(looper);
@@ -51,7 +58,29 @@ public class LocationService extends Service {
             location1.setLatitude(location.getLatitude());
             location1.setLongitude(location.getLongitude());
             location1.setTimestamp(new Date(location.getTime()));
+            sentLocation = location;
             new DigitServiceManager(applicationContext).sendLocation(location1,finished);
+        }
+
+        private PendingIntent getGeofencePendingIntent() {
+            Intent intent = new Intent(applicationContext, GeofenceTransitionsIntentService.class);
+            return PendingIntent.getService(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
+        private GeofencingRequest getGeofencingRequest(GeofenceRequest geofenceRequest, double latitude, double longitude) {
+            GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+            builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT);
+            builder.addGeofence(new Geofence.Builder()
+                    .setRequestId("digitGeofence1")
+                    .setCircularRegion(
+                            latitude,
+                            longitude,
+                            100
+                    )
+                    .setExpirationDuration(geofenceRequest.getEnd().getTime() - new Date().getTime())
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .build());
+            return builder.build();
         }
 
         @Override
@@ -74,12 +103,37 @@ public class LocationService extends Service {
                         alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
                                 response.body().getNextUpdateRequiredAt().getTime(), alarmIntent);
                     }
-                    stopSelf();
+                    if (null != response.body().getRequestGeofence()){
+                        GeofencingClient geofencingClient = LocationServices.getGeofencingClient(applicationContext);
+                        try {
+                            geofencingClient.addGeofences(
+                                    getGeofencingRequest(response.body().getRequestGeofence(), sentLocation.getLatitude(), sentLocation.getLongitude()),
+                                    getGeofencePendingIntent())
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            new DigitServiceManager(applicationContext).log("Geofence failed to add", 3, finished);
+                                        }
+                                    })
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+
+                                            new DigitServiceManager(applicationContext).log("Geofence added successfully", 3, finished);
+                                        }
+                                    });
+                        }
+                        catch (SecurityException e) {
+                            new DigitServiceManager(applicationContext).log("GeofenceSecurityError", 3, finished);
+                        }
+                    } else {
+                        stopSelf();
+                    }
                 }
 
                 @Override
                 public void onFailure(Call<LocationResponse> call, Throwable t) {
-                    stopSelf();
+                    new DigitServiceManager(applicationContext).log("Send location failed " + t.getMessage(), 3, finished);
                 }
             };
             try {
@@ -163,3 +217,4 @@ public class LocationService extends Service {
         Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
     }
 }
+

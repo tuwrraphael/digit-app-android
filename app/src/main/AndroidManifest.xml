@@ -39,6 +39,7 @@
             </intent-filter>
         </service>
         <service android:name="digit.digitapp.LocationService"></service>
+        <service android:name="digit.digitapp.GeofenceTransitionsIntentService"/>
         <receiver android:name="digit.digitapp.LocationAlarmReceiver">
             <intent-filter>
                 <action android:name="digit.digitapp.alarms" />

@@ -55,6 +55,16 @@ public class DigitServiceManager {
         });
     }
 
+    public void log(String msg, int code) {
+        final ActionFinished finished = new ActionFinished() {
+            @Override
+            public void finished() {
+
+            }
+        };
+        log(msg,code,finished);
+    }
+
     public void log(String msg, int code, final ActionFinished finished) {
         final LogEntry entry = new LogEntry(null, new Date(), code, msg, "digitAppAndroid");
         executeAuthorized(new DigitServiceAction() {
@@ -106,7 +116,7 @@ public class DigitServiceManager {
                                 return chain.proceed(newRequest);
                             }
                         }).build();
-                        Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new GsonUTCDateAdapter()).create();
+                        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
                         Retrofit retrofit = new Retrofit.Builder()
                                 .client(client)
                                 .baseUrl(digitServiceClientConfig.getDigitServiceUrl())
