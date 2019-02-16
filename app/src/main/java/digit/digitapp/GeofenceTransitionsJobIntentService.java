@@ -1,23 +1,28 @@
 package digit.digitapp;
 
-import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.support.v4.app.JobIntentService;
 
 import com.google.android.gms.location.GeofencingEvent;
 
-public class GeofenceTransitionsIntentService extends IntentService {
+public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
-    private final Context context;
+    private static final int JOB_ID = 573;
 
-    public GeofenceTransitionsIntentService(String name) {
-        super(name);
-        context = this.getApplicationContext();
+    private static final String TAG = "GeofenceTransitionsIS";
+
+    private static final String CHANNEL_ID = "channel_01";
+
+    public static void enqueueWork(Context context, Intent intent) {
+        enqueueWork(context, GeofenceTransitionsJobIntentService.class, JOB_ID, intent);
     }
 
-    protected void onHandleIntent(Intent intent) {
+    @Override
+    protected void onHandleWork(Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+        Context context = this.getApplicationContext();
         DigitServiceManager digitServiceManager = new DigitServiceManager(context);
         if (geofencingEvent.hasError()) {
             digitServiceManager.log("Geofence has errors", 3);
@@ -32,5 +37,4 @@ public class GeofenceTransitionsIntentService extends IntentService {
             }
         }
     }
-
 }

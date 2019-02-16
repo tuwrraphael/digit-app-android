@@ -63,8 +63,8 @@ public class LocationService extends Service {
         }
 
         private PendingIntent getGeofencePendingIntent() {
-            Intent intent = new Intent(applicationContext, GeofenceTransitionsIntentService.class);
-            return PendingIntent.getService(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent intent = new Intent(applicationContext, GeofenceBroadcastReceiver.class);
+            return PendingIntent.getBroadcast(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         private GeofencingRequest getGeofencingRequest(GeofenceRequest geofenceRequest, double latitude, double longitude) {
@@ -75,8 +75,9 @@ public class LocationService extends Service {
                     .setCircularRegion(
                             latitude,
                             longitude,
-                            100
+                            70
                     )
+                    .setNotificationResponsiveness(60000)
                     .setExpirationDuration(geofenceRequest.getEnd().getTime() - new Date().getTime())
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
                     .build());
@@ -119,7 +120,7 @@ public class LocationService extends Service {
                                         @Override
                                         public void onSuccess(Void aVoid) {
 
-                                            new DigitServiceManager(applicationContext).log("Geofence added successfully", 3, finished);
+                                            new DigitServiceManager(applicationContext).log("Geofence added successfully", 0, finished);
                                         }
                                     });
                         }
