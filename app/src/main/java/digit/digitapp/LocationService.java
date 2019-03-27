@@ -12,7 +12,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
@@ -35,7 +34,6 @@ import java.util.TimeZone;
 import digit.digitapp.digitService.GeofenceRequest;
 import digit.digitapp.digitService.LocationResponse;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 
@@ -215,7 +213,7 @@ public class LocationService extends Service {
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+
     }
 }
 

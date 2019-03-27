@@ -22,3 +22,4 @@ public class GeofenceRequest {
         this.end = end;
     }
 }
+

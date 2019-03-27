@@ -3,6 +3,10 @@
     <string name="LoginErrorText">Login Error</string>
     <string name="location_notification_title">Digit Lokalisierung</string>
     <string name="location_notification_content">Digit verwendet Ihre Position um Routen zu planen.</string>
+    <string name="syncing_notification_title">Digit Synchronisierung</string>
+    <string name="syncing_notification_content">Digit synchronisiert mit ihrem Gerät.</string>
+    <string name="authError_notification_title">Digit Loginfehler</string>
+    <string name="authError_notification_content">Bitte melden Sie sich erneut in der Digit App an.</string>
     <string name="default_channel_name">Standardkanal</string>
     <string name="default_channel_description">Standardkanal für Digit</string>
 </resources>
