@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import digit.digitapp.digitService.DeviceData;
 import digit.digitapp.digitService.DigitServiceClient;
 import digit.digitapp.digitService.Location;
 import digit.digitapp.digitService.LocationResponse;
@@ -92,6 +93,20 @@ public class DigitServiceManager {
         });
     }
 
+    public void getDeviceData(final String id, final Callback<DeviceData> cb) {
+        executeAuthorized(new DigitServiceAction() {
+            @Override
+            public void execute(DigitServiceClient digitServiceClient) {
+                digitServiceClient.GetDeviceData(id).enqueue(cb);
+            }
+
+            @Override
+            public void authFailed(Throwable t) {
+                cb.onFailure(null,t);
+            }
+        });
+    }
+
     public void log(String msg, int code, final ActionFinished finished) {
         final LogEntry entry = new LogEntry(null, new Date(), code, msg, "digitAppAndroid");
         executeAuthorized(new DigitServiceAction() {
@@ -117,6 +132,19 @@ public class DigitServiceManager {
         });
     }
 
+    public void setSynched(final String id, final Callback<ResponseBody> cb) {
+        executeAuthorized(new DigitServiceAction() {
+            @Override
+            public void execute(DigitServiceClient digitServiceClient) {
+                    digitServiceClient.SetSynced(id).enqueue(cb);
+            }
+
+            @Override
+            public void authFailed(Throwable t) {
+                cb.onFailure(null,t);
+            }
+        });
+    }
 
     private void executeAuthorized(final DigitServiceAction action) {
         final SharedPreferences mPrefs = context.getSharedPreferences("DigitSettings", Context.MODE_PRIVATE);

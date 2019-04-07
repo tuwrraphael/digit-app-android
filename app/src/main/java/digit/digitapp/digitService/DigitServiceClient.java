@@ -4,6 +4,7 @@ import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -21,5 +22,8 @@ public interface DigitServiceClient {
     Call<List<SyncAction>> GetSyncActions();
 
     @PUT("api/me/sync/{id}")
-    Call SetSynced(@Path("id") String id);
+    Call<ResponseBody> SetSynced(@Path("id") String id);
+
+    @GET("api/devices/{id}/data")
+    Call<DeviceData> GetDeviceData(@Path("id") String id);
 }
