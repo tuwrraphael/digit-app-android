@@ -28,17 +28,13 @@ import digit.digitapp.digitService.Location;
 import digit.digitapp.digitService.LocationResponse;
 import digit.digitapp.digitService.LogEntry;
 import digit.digitapp.digitService.SyncAction;
-import digit.digitapp.pushService.FirebasePushChannelRegistration;
-import digit.digitapp.pushService.FirebasePushChannelRegistrationOptions;
-import digit.digitapp.pushService.PushChannelConfiguration;
-import digit.digitapp.pushService.PushServiceClient;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -83,7 +79,13 @@ public class DigitServiceManager {
         executeAuthorized(new DigitServiceAction() {
             @Override
             public void execute(DigitServiceClient digitServiceClient) {
-                digitServiceClient.GetSyncActions().enqueue(cb);
+
+                try {
+                    Response<List<SyncAction>> res = digitServiceClient.GetSyncActions().execute();
+                    cb.onResponse(null, res);
+                } catch (IOException e) {
+                    cb.onFailure(null,e);
+                }
             }
 
             @Override
@@ -189,7 +191,7 @@ public class DigitServiceManager {
                                     .connectTimeout(10, TimeUnit.SECONDS)
                                     .addInterceptor(new Interceptor() {
                                         @Override
-                                        public Response intercept(Chain chain) throws IOException {
+                                        public okhttp3.Response intercept(Chain chain) throws IOException {
                                             Request newRequest = chain.request().newBuilder()
                                                     .addHeader("Authorization", "Bearer " + accessToken)
                                                     .build();

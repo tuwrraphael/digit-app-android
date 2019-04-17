@@ -84,4 +84,13 @@ public class MainActivity extends Activity {
             notificationManager.createNotificationChannel(channel);
         }
     }
+
+    public void performPendingSyncs(View view) {
+        Intent i = new Intent(this, DigitSyncService1.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(i);
+        } else {
+            startService(i);
+        }
+    }
 }

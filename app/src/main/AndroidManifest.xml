@@ -40,8 +40,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name="digit.digitapp.LocationService"></service>
-        <service android:name="digit.digitapp.DigitSyncService"></service>
+        <service android:name="digit.digitapp.DigitSyncService1"></service>
         <receiver
             android:name=".GeofenceBroadcastReceiver"
             android:enabled="true"

@@ -21,7 +21,7 @@ public class DigitFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Map<String, String> data = remoteMessage.getData();
         final Context context = getApplicationContext();
-        Intent i = new Intent(context, DigitSyncService.class);
+        Intent i = new Intent(context, DigitSyncService1.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(i);
         } else {

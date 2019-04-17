@@ -8,7 +8,7 @@ import android.os.Build;
 public class LocationAlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent i = new Intent(context, DigitSyncService.class);
+        Intent i = new Intent(context, DigitSyncService1.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(i);
         } else {

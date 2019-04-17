@@ -29,7 +29,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         }
         else {
             digitServiceManager.log("Geofence trigger type " +geofencingEvent.getGeofenceTransition(), 0);
-            Intent i = new Intent(context, LocationService.class);
+            Intent i = new Intent(context, DigitSyncService1.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(i);
             } else {

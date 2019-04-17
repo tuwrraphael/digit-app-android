@@ -1,3 +1,4 @@
+/*
 package digit.digitapp;
 
 import android.app.IntentService;
@@ -28,9 +29,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
 import digit.digitapp.digitService.DeviceData;
 import digit.digitapp.digitService.LegData;
 import digit.digitapp.digitService.SyncAction;
+import no.nordicsemi.android.ble.BleManager;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -413,4 +416,4 @@ public class DigitSyncService extends Service {
     public void onDestroy() {
 
     }
-}
+}*/
