@@ -37,11 +37,12 @@ dependencies {
     api 'net.openid:appauth:0.7.1'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
-    implementation 'com.google.firebase:firebase-core:16.0.6'
-    implementation 'com.google.firebase:firebase-messaging:17.3.4'
+    implementation 'com.google.firebase:firebase-core:16.0.8'
+    implementation 'com.google.firebase:firebase-messaging:17.6.0'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
-    implementation 'androidx.annotation:annotation:1.0.0'
+    implementation 'androidx.annotation:annotation:1.0.2'
     implementation 'no.nordicsemi.android:ble:2.1.1'
+    implementation 'no.nordicsemi.android.support.v18:scanner:1.4.0'
     implementation "com.android.support:customtabs:28.0.0"
     implementation "com.android.support:asynclayoutinflater:28.0.0"
     implementation "com.android.support:support-fragment:28.0.0"

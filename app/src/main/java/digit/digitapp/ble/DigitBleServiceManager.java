@@ -115,9 +115,9 @@ public class DigitBleServiceManager extends BleManager<BleManagerCallbacks> {
         return writeCharacteristic(ctsChar, FormatCts(calendar));
     }
 
-    public void writeEvent(DeviceData deviceData) {
+    public WriteRequest writeEvent(DeviceData deviceData) {
         if (null == deviceData.getEvent()) {
-            writeCharacteristic(eventChar,new byte[]{0}) .enqueue();
+           return writeCharacteristic(eventChar,new byte[]{0});
         } else {
             String subject = constrain(deviceData.getEvent().getSubject(), subjectLength-1);
             byte [] subjectBytes = subject.getBytes(StandardCharsets.ISO_8859_1);
@@ -128,13 +128,13 @@ public class DigitBleServiceManager extends BleManager<BleManagerCallbacks> {
             System.arraycopy(subjectBytes,0,data, ctsLength,subjectBytes.length);
             data[ctsLength + subjectBytes.length] = '\0';
             eventChar.setValue(data);
-            writeCharacteristic(eventChar,data) .enqueue();
+            return writeCharacteristic(eventChar,data);
         }
     }
 
-    public void writeDirections(DeviceData deviceData) {
+    public WriteRequest writeDirections(DeviceData deviceData) {
         if (null == deviceData.getDirections()) {
-            writeCharacteristic(directionsChar,new byte[]{0}) .enqueue();
+            return writeCharacteristic(directionsChar,new byte[]{0});
         } else {
             byte[] data = new byte[2 * ctsLength + 1];
             data[0] = (byte)deviceData.getDirections().getLegs().size();
@@ -143,11 +143,11 @@ public class DigitBleServiceManager extends BleManager<BleManagerCallbacks> {
             System.arraycopy(FormatCts(calendar),0,data, 1,ctsLength);
             calendar.setTime(deviceData.getDirections().getArrivalTime());
             System.arraycopy(FormatCts(calendar),0,data, 1 + ctsLength,ctsLength);
-            writeCharacteristic(directionsChar,data);
+            return writeCharacteristic(directionsChar,data);
         }
     }
 
-    public void writeLeg(DeviceData deviceData, int legIndex) {
+    public WriteRequest writeLeg(DeviceData deviceData, int legIndex) {
         LegData leg = deviceData.getDirections().getLegs().get(legIndex);
         String line = constrain(leg.getLine(), lineLength - 1);
         String direction = constrain(leg.getDirection(), directionLength - 1);
@@ -173,6 +173,10 @@ public class DigitBleServiceManager extends BleManager<BleManagerCallbacks> {
         System.arraycopy(directionBytes,0,data, 1 + ctsLength + 4 + lineBytes.length,directionBytes.length);
         System.arraycopy(departureStopBytes,0,data,  1 + ctsLength + 4 + lineBytes.length + directionBytes.length,departureStopBytes.length);
         System.arraycopy(arrivalStopBytes,0,data,  1 + ctsLength + 4 + lineBytes.length + directionBytes.length + departureStopBytes.length,arrivalStopBytes.length);
-        writeCharacteristic(legChar,data);
+        return writeCharacteristic(legChar,data);
+    }
+
+    public  void WriteDeviceData (DeviceData deviceData) {
+        writeCts(Calendar.getInstance());
     }
 }

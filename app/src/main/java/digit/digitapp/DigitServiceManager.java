@@ -79,13 +79,7 @@ public class DigitServiceManager {
         executeAuthorized(new DigitServiceAction() {
             @Override
             public void execute(DigitServiceClient digitServiceClient) {
-
-                try {
-                    Response<List<SyncAction>> res = digitServiceClient.GetSyncActions().execute();
-                    cb.onResponse(null, res);
-                } catch (IOException e) {
-                    cb.onFailure(null,e);
-                }
+                digitServiceClient.GetSyncActions().enqueue(cb);
             }
 
             @Override

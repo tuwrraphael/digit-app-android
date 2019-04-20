@@ -29,11 +29,18 @@ public class DigitSyncService1 extends Service {
     private final class ServiceHandler extends Handler {
         private Context applicationContext;
         private Context serviceContext;
+        private CountDownLatch syncFinish;
+        CountDownLatch syncLatchReady;
 
         public ServiceHandler(Looper looper, Context context, Context serviceContext) {
             super(looper);
             this.applicationContext = context;
             this.serviceContext = serviceContext;
+        }
+
+        private void initializeSyncFinish(int size) {
+            syncFinish = new CountDownLatch(size);
+            syncLatchReady.countDown();
         }
 
         @Override
@@ -43,16 +50,16 @@ public class DigitSyncService1 extends Service {
             boolean stop = false;
             while (!stop){
                 List<String> startedActions = new ArrayList<String>();
-                CountDownLatch waitFinish = new CountDownLatch(1);
+                syncLatchReady = new CountDownLatch(1);
                 digitServiceManager.getPendingSyncActions(new retrofit2.Callback<List<SyncAction>>() {
                     @Override
                     public void onResponse(Call<List<SyncAction>> call, Response<List<SyncAction>> response) {
                         if (response.body().isEmpty()) {
-                            waitFinish.countDown();
+                            initializeSyncFinish(0);
                             return;
                         }
                         List<String> distinctActions = response.body().stream().map(s -> s.getId()).distinct().collect(Collectors.toList());
-                        CountDownLatch syncFinish = new CountDownLatch(distinctActions.size());
+                        initializeSyncFinish(distinctActions.size());
                         for (String id : distinctActions) {
                             SyncCallback callback = new SyncCallback() {
                                 @Override
@@ -76,30 +83,24 @@ public class DigitSyncService1 extends Service {
                             } else if (id.startsWith("deviceSync.")) {
                                 startedActions.add(id);
                                 String deviceId = id.substring("deviceSync.".length());
-                                new DeviceSynchronizationManager(deviceId, serviceContext).performSynchronization(callback);
+                                new DeviceSynchronizationManager(deviceId, callback, serviceContext).performSynchronization();
                             }
-                        }
-                        try {
-                            syncFinish.await();
-                            waitFinish.countDown();
-                        } catch (InterruptedException e) {
-                            digitServiceManager.log("Interrupted Exception 1", 3, () ->
-                                    waitFinish.countDown()
-                            );
                         }
                     }
                     @Override
                     public void onFailure(Call<List<SyncAction>> call, Throwable t) {
                         digitServiceManager.log("Get SyncActions failed" + t.getMessage(), 3, () ->
-                                waitFinish.countDown()
+                                initializeSyncFinish(0)
                         );
                     }
                 });
                 try {
-                    waitFinish.await();
+                    syncLatchReady.await();
+                    syncFinish.await();
                     if (startedActions.isEmpty()) {
-                        stop = true;
+
                     }
+                    stop = true; // TODO fix location loop first
                 } catch (InterruptedException e) {
                     digitServiceManager.log("Interrupted Exception 2", 3, () ->
                             stopSelf(msg.arg1)
