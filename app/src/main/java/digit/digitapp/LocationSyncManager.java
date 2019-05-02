@@ -60,7 +60,7 @@ public class LocationSyncManager {
                         longitude,
                         70
                 )
-                .setNotificationResponsiveness(60000)
+                .setNotificationResponsiveness(20000)
                 .setExpirationDuration(geofenceRequest.getEnd().getTime() - new Date().getTime())
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
                 .build());
@@ -118,7 +118,7 @@ public class LocationSyncManager {
                     .addOnSuccessListener(new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(final Location location) {
-                            if (null == location || (Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis() - location.getTime()) < (1000 *60 * 5)) {
+                            if (null == location || (Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis() - location.getTime()) > (1000 * 30)) {
                                 final LocationCallback locationCallback = new LocationCallback() {
                                     @Override
                                     public void onLocationResult(LocationResult locationResult) {
@@ -126,12 +126,12 @@ public class LocationSyncManager {
                                             new DigitServiceManager(applicationContext).log("Location was null", 3, callback::failed);
                                             return;
                                         }
-                                        sendLocation(locationResult.getLastLocation(), cb);
                                         fusedLocationProviderClient.removeLocationUpdates(this);
+                                        sendLocation(locationResult.getLastLocation(), cb);
                                     };
                                 };
                                 LocationRequest mLocationRequest = new LocationRequest();
-                                mLocationRequest.setMaxWaitTime(10000);
+                                mLocationRequest.setMaxWaitTime(15000);
                                 mLocationRequest.setNumUpdates(1);
                                 mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                                 fusedLocationProviderClient.requestLocationUpdates(mLocationRequest,locationCallback, null);
