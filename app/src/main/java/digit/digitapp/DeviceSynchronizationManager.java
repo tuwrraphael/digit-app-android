@@ -36,6 +36,7 @@ public class DeviceSynchronizationManager {
     private android.os.Handler mHandler;
     private boolean scanning;
     private  Object scanningLock = new Object();
+    private int writeRetryCount;
 
     public DeviceSynchronizationManager(String deviceId, SyncCallback callback, Context applicationContext) {
         this.deviceId = deviceId;
@@ -81,10 +82,7 @@ public class DeviceSynchronizationManager {
                 digitServiceManager.getDeviceData(deviceId, new Callback<DeviceData>() {
                     @Override
                     public void onResponse(Call<DeviceData> call, Response<DeviceData> response) {
-                        digitBleServiceManager.writeCts(Calendar.getInstance())
-                                .fail((d, status) -> logWriteFailureAndExit(status, "cts"))
-                                .done(d -> writeEvent(response.body()))
-                                .enqueue();
+                        writeCts(response.body());
                     }
                     @Override
                     public void onFailure(Call<DeviceData> call, Throwable t) {
@@ -121,6 +119,7 @@ public class DeviceSynchronizationManager {
     }
 
     public void performSynchronization() {
+        writeRetryCount = 0;
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) applicationContext.getSystemService(Context.BLUETOOTH_SERVICE);
         final BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
@@ -182,6 +181,19 @@ public class DeviceSynchronizationManager {
         return digitBleServiceManager.connect(device)
                 .retry(3,5000)
                 .useAutoConnect(false);
+    }
+
+    private void writeCts(final  DeviceData deviceData) {
+        digitBleServiceManager.writeCts(Calendar.getInstance())
+                .fail((d, status) -> {
+                    if (++writeRetryCount > 3) {
+                        logWriteFailureAndExit(status, "cts");
+                    } else {
+                        writeCts(deviceData);
+                    }
+                })
+                .done(d -> writeEvent(deviceData))
+                .enqueue();
     }
 
     private void logWriteFailureAndExit(final int status, final String action) {
