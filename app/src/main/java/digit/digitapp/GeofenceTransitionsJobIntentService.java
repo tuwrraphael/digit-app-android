@@ -7,6 +7,8 @@ import android.support.v4.app.JobIntentService;
 
 import com.google.android.gms.location.GeofencingEvent;
 
+import java.util.stream.Collectors;
+
 public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
     private static final int JOB_ID = 573;
@@ -28,7 +30,9 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             digitServiceManager.log("Geofence has errors", 3);
         }
         else {
-            digitServiceManager.log("Geofence trigger type " +geofencingEvent.getGeofenceTransition(), 0);
+            String ids = geofencingEvent.getTriggeringGeofences().stream()
+                    .map(f -> f.getRequestId()).collect(Collectors.joining(", "));
+            digitServiceManager.log("Geofence " + ids+" type " +geofencingEvent.getGeofenceTransition(), 0);
             Intent i = new Intent(context, DigitSyncService1.class);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(i);

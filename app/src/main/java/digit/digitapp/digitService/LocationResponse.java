@@ -1,10 +1,11 @@
 package digit.digitapp.digitService;
 
 import java.util.Date;
+import java.util.List;
 
 public class LocationResponse {
     private Date nextUpdateRequiredAt;
-    private GeofenceRequest requestGeofence;
+    private List<GeofenceRequest> geofences;
 
     public Date getNextUpdateRequiredAt() {
         return nextUpdateRequiredAt;
@@ -14,12 +15,12 @@ public class LocationResponse {
         this.nextUpdateRequiredAt = nextUpdateRequiredAt;
     }
 
-    public GeofenceRequest getRequestGeofence() {
-        return requestGeofence;
+    public List<GeofenceRequest> getGeofences() {
+        return geofences;
     }
 
-    public void setRequestGeofence(GeofenceRequest requestGeofence) {
-        this.requestGeofence = requestGeofence;
+    public void setGeofences(List<GeofenceRequest> geofences) {
+        this.geofences = geofences;
     }
 }
 
