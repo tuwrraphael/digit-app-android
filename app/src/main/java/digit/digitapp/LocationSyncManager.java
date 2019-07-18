@@ -84,7 +84,8 @@ public class LocationSyncManager {
                     alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
                             response.body().getNextUpdateRequiredAt().getTime(), alarmIntent);
                 }
-                if (null != response.body() && null != response.body().getGeofences()){
+                if (null != response.body() && null != response.body().getGeofences()
+                        && !response.body().getGeofences().isEmpty()){
                     GeofencingClient geofencingClient = LocationServices.getGeofencingClient(applicationContext);
                     try {
                         geofencingClient.addGeofences(
