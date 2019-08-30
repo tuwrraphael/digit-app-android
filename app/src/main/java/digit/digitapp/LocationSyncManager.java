@@ -94,7 +94,7 @@ public class LocationSyncManager {
                                 .addOnFailureListener(e ->
                                         new DigitServiceManager(applicationContext).log("Geofences failed to add", 3, callback::failed))
                                 .addOnSuccessListener(aVoid ->
-                                        new DigitServiceManager(applicationContext).log("Geofences added successfully", 0, callback::failed));
+                                        new DigitServiceManager(applicationContext).log("Geofences added successfully", 0, callback::done));
                     }
                     catch (SecurityException e) {
                         new DigitServiceManager(applicationContext).log("GeofenceSecurityError", 3, callback::failed);

@@ -5,7 +5,7 @@ import java.util.Map;
 public class FirebasePushChannelRegistration {
     private String token;
     private String deviceInfo;
-    private  FirebasePushChannelRegistrationOptions options;
+    private Map<String,String> options;
 
     public String getToken() {
         return token;
@@ -23,11 +23,11 @@ public class FirebasePushChannelRegistration {
         this.deviceInfo = deviceInfo;
     }
 
-    public FirebasePushChannelRegistrationOptions getOptions() {
+    public Map<String, String> getOptions() {
         return options;
     }
 
-    public void setOptions(FirebasePushChannelRegistrationOptions options) {
+    public void setOptions(Map<String, String> options) {
         this.options = options;
     }
 }

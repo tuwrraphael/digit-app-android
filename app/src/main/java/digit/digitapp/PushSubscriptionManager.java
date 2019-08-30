@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import digit.digitapp.pushService.FirebasePushChannelRegistration;
-import digit.digitapp.pushService.FirebasePushChannelRegistrationOptions;
 import digit.digitapp.pushService.PushChannelConfiguration;
 import digit.digitapp.pushService.PushServiceClient;
 import okhttp3.Interceptor;
@@ -68,15 +67,13 @@ public class PushSubscriptionManager {
                             @Override
                             public void onResponse(Call<PushChannelConfiguration[]> call, retrofit2.Response<PushChannelConfiguration[]> response) {
                                 FirebasePushChannelRegistration registration = new FirebasePushChannelRegistration();
-                                registration.setDeviceInfo("Android");
-                                FirebasePushChannelRegistrationOptions options = new FirebasePushChannelRegistrationOptions();
-                                options.setDigitLocationRequest("supported");
-                                registration.setOptions(options);
                                 registration.setToken(token);
                                 boolean channelExists = false;
                                 for(PushChannelConfiguration config:response.body()){
                                     channelExists = config.getOptions().containsKey("digitLocationRequest");
                                     if (channelExists) {
+                                        registration.setOptions(config.getOptions());
+                                        registration.getOptions().put("digitLocationRequest", "supported");
                                         pushServiceClient.UpdateChannel(config.getId(), registration).enqueue(new Callback<PushChannelConfiguration[]>() {
                                             @Override
                                             public void onResponse(Call<PushChannelConfiguration[]> call, retrofit2.Response<PushChannelConfiguration[]> response) {
@@ -92,6 +89,10 @@ public class PushSubscriptionManager {
                                     }
                                 }
                                 if (!channelExists) {
+                                    registration.setDeviceInfo("Android");
+                                    registration.setOptions(new HashMap<>());
+                                    registration.getOptions().put("digitLocationRequest", "supported");
+                                    registration.setToken(token);
                                     pushServiceClient.CreateChannel(registration).enqueue(new Callback<PushChannelConfiguration[]>() {
                                         @Override
                                         public void onResponse(Call<PushChannelConfiguration[]> call, retrofit2.Response<PushChannelConfiguration[]> response) {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v4.app.JobIntentService;
+import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.location.GeofencingEvent;
 
@@ -34,11 +35,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     .map(f -> f.getRequestId()).collect(Collectors.joining(", "));
             digitServiceManager.log("Geofence " + ids+" type " +geofencingEvent.getGeofenceTransition(), 0);
             Intent i = new Intent(context, DigitSyncService1.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(i);
-            } else {
-                startService(i);
-            }
+            i.putExtra("action","locationSync");
+            ContextCompat.startForegroundService(context, i);
         }
     }
 }

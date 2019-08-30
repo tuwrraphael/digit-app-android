@@ -30,7 +30,6 @@ public class DigitSyncService1 extends Service {
         private Context applicationContext;
         private Context serviceContext;
         private CountDownLatch syncFinish;
-        CountDownLatch syncLatchReady;
 
         public ServiceHandler(Looper looper, Context context, Context serviceContext) {
             super(looper);
@@ -38,74 +37,35 @@ public class DigitSyncService1 extends Service {
             this.serviceContext = serviceContext;
         }
 
-        private void initializeSyncFinish(int size) {
-            syncFinish = new CountDownLatch(size);
-            syncLatchReady.countDown();
-        }
-
         @Override
         public void handleMessage(final Message msg) {
             DigitServiceManager digitServiceManager = new DigitServiceManager(applicationContext);
-            List<String> failedActions = new ArrayList<String>();
-            boolean stop = false;
-            while (!stop){
-                List<String> startedActions = new ArrayList<String>();
-                syncLatchReady = new CountDownLatch(1);
-                digitServiceManager.getPendingSyncActions(new retrofit2.Callback<List<SyncAction>>() {
-                    @Override
-                    public void onResponse(Call<List<SyncAction>> call, Response<List<SyncAction>> response) {
-                        if (response.body().isEmpty()) {
-                            initializeSyncFinish(0);
-                            return;
-                        }
-                        List<String> distinctActions = response.body().stream().map(s -> s.getId()).distinct().collect(Collectors.toList());
-                        initializeSyncFinish(distinctActions.size());
-                        for (String id : distinctActions) {
-                            SyncCallback callback = new SyncCallback() {
-                                @Override
-                                public void done() {
-                                    syncFinish.countDown();
-                                }
-
-                                @Override
-                                public void failed() {
-                                    failedActions.add(id);
-                                    syncFinish.countDown();
-                                }
-                            };
-                            if (failedActions.contains(id)) {
-                                // TODO retry, continue for now
-                                syncFinish.countDown();
-                            }
-                            else if ("locationSync".equals(id) || "legacyLocationSync".equals(id)) {
-                                startedActions.add(id);
-                                new LocationSyncManager(applicationContext).syncLocation(callback);
-                            } else if (id.startsWith("deviceSync.")) {
-                                startedActions.add(id);
-                                String deviceId = id.substring("deviceSync.".length());
-                                new DeviceSynchronizationManager(deviceId, callback, serviceContext).performSynchronization();
-                            }
-                        }
-                    }
-                    @Override
-                    public void onFailure(Call<List<SyncAction>> call, Throwable t) {
-                        digitServiceManager.log("Get SyncActions failed" + t.getMessage(), 3, () ->
-                                initializeSyncFinish(0)
-                        );
-                    }
-                });
-                try {
-                    syncLatchReady.await();
-                    syncFinish.await();
-                    if (startedActions.isEmpty()) {
-
-                    }
-                    stop = true; // TODO fix location loop first
-                } catch (InterruptedException e) {
-                    digitServiceManager.log("Interrupted Exception 2", 3, () ->
-                            stopSelf(msg.arg1)
-                    );
+            syncFinish = new CountDownLatch(1);
+            String action = (String)msg.obj;
+            SyncCallback callback = new SyncCallback() {
+                @Override
+                public void done() {
+                    syncFinish.countDown();
                 }
+
+                @Override
+                public void failed() {
+                    syncFinish.countDown();
+                }
+            };
+            if ("locationSync".equals(action)) {
+                new LocationSyncManager(applicationContext).syncLocation(callback);
+            }
+            else if( action.startsWith("deviceSync.")) {
+                String deviceId = action.substring("deviceSync.".length());
+                new DeviceSynchronizationManager(deviceId, callback, serviceContext).performSynchronization();
+            }
+            try {
+                syncFinish.await();
+            } catch (InterruptedException e) {
+                digitServiceManager.log("Interrupted Exception 2", 3, () ->
+                        stopSelf(msg.arg1)
+                );
             }
             stopSelf(msg.arg1);
         }
@@ -141,8 +101,8 @@ public class DigitSyncService1 extends Service {
         // start ID so we know which request we're stopping when we finish the job
         Message msg = mServiceHandler.obtainMessage();
         msg.arg1 = startId;
+        msg.obj = intent.getStringExtra("action");
         mServiceHandler.sendMessage(msg);
-
         // If we get killed, after returning from here, restart
         return START_REDELIVER_INTENT;
     }

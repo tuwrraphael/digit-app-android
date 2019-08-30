@@ -3,9 +3,11 @@ package digit.digitapp;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
 
 import java.util.Map;
 
@@ -13,24 +15,22 @@ public class DigitFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String s) {
         new PushSubscriptionManager(this.getApplicationContext()).sendToken(s);
-        getSharedPreferences("_", MODE_PRIVATE).edit().putString("fb", s).apply();
         super.onNewToken(s);
     }
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Map<String, String> data = remoteMessage.getData();
-        final Context context = getApplicationContext();
-        Intent i = new Intent(context, DigitSyncService1.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(i);
-        } else {
-            startService(i);
+        if (data.containsKey("actions")) {
+            final Context context = getApplicationContext();
+            Gson gson = new Gson();
+            String[] actions = gson.fromJson(data.get("actions"), String[].class);
+            for (String action: actions) {
+                Intent i = new Intent(context, DigitSyncService1.class);
+                i.putExtra("action", action);
+                ContextCompat.startForegroundService(context, i);
+            }
         }
         super.onMessageReceived(remoteMessage);
-    }
-
-    public static String getToken(Context context) {
-        return context.getSharedPreferences("_", MODE_PRIVATE).getString("fb", "empty");
     }
 }

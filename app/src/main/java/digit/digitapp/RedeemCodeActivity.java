@@ -7,10 +7,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -48,8 +52,20 @@ public class RedeemCodeActivity extends Activity {
                         @Override public void onTokenRequestCompleted(TokenResponse tokenResponse, AuthorizationException ex) {
                             authStateManager.updateAfterTokenResponse(tokenResponse, ex);
                             if (tokenResponse != null) {
-                                String token = DigitFirebaseMessagingService.getToken(context);
-                                new PushSubscriptionManager(context).sendToken(token);
+                                FirebaseInstanceId.getInstance().getInstanceId()
+                                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                                if (!task.isSuccessful()) {
+                                                    Log.w("DigitRedeemCode", "getInstanceId failed", task.getException());
+                                                    return;
+                                                }
+                                                String token = task.getResult().getToken();
+                                                new PushSubscriptionManager(context).sendToken(token);
+                                                Log.d("DigitRedeemCode", token);
+
+                                            }
+                                        });
                                 Intent mainActivity = new Intent(context, MainActivity.class);
                                 startActivity(mainActivity);
                                 final SharedPreferences mPrefs = context.getSharedPreferences("DigitSettings", Context.MODE_PRIVATE);
